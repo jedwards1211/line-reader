@@ -219,4 +219,24 @@ describe("lineReader", function() {
       });
     });
   });
+
+  describe("eachLineSync", function() {
+    it("should read lines using the default separator", function(done) {
+      var i = 0;
+
+      lineReader.eachLineSync(testFilePath, function(line, last) {
+        assert.equal(testFile[i], line, 'line ' + i + ' should be what we expect');
+        i += 1;
+
+        if (i === 6) {
+          assert.ok(last);
+        } else {
+          assert.ok(!last);
+        }
+      });
+
+      assert.equal(6, i);
+      done();
+    });
+  });
 });
