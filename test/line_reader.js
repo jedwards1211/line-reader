@@ -405,5 +405,153 @@ describe("lineReader", function() {
       assert.equal(6, i);
       done();
     });
+
+    it("should read windows files by default", function(done) {
+      var i = 0;
+
+      lineReader.eachLineSync(windowsFilePath, function(line, last) {
+        assert.equal(testFile[i], line, 'Each line should be what we expect');
+        i += 1;
+
+        if (i === 6) {
+          assert.ok(last);
+        } else {
+          assert.ok(!last);
+        }
+      });
+      assert.equal(6, i);
+      done();
+    });
+
+    it("should handle \\r\\n overlapping buffer window correctly", function(done) {
+      var i = 0;
+      var bufferSize = 5;
+
+      lineReader.eachLineSync(windowsBufferOverlapFilePath, {bufferSize: bufferSize}, function(line, last) {
+        assert.equal(testBufferOverlapFile[i], line, 'Each line should be what we expect');
+        i += 1;
+
+        if (i === 2) {
+          assert.ok(last);
+        } else {
+          assert.ok(!last);
+        }
+      });
+      assert.equal(2, i);
+      done();
+    });
+
+    it("should read unix files by default", function(done) {
+      var i = 0;
+
+      lineReader.eachLineSync(unixFilePath, function(line, last) {
+        assert.equal(testFile[i], line, 'Each line should be what we expect');
+        i += 1;
+
+        if (i === 6) {
+          assert.ok(last);
+        } else {
+          assert.ok(!last);
+        }
+      });
+      assert.equal(6, i);
+      done();
+    });
+
+    it("should read mac os 9 files by default", function(done) {
+      var i = 0;
+
+      lineReader.eachLineSync(macOs9FilePath, function(line, last) {
+        assert.equal(testFile[i], line, 'Each line should be what we expect');
+        i += 1;
+
+        if (i === 6) {
+          assert.ok(last);
+        } else {
+          assert.ok(!last);
+        }
+      });
+      assert.equal(6, i);
+      done();
+    });
+
+    it("should allow continuation of line reading via a callback", function(done) {
+      var i = 0;
+
+      lineReader.eachLineSync(testFilePath, function(line, last, cb) {
+        assert.equal(testFile[i], line, 'Each line should be what we expect');
+        i += 1;
+
+        if (i === 6) {
+          assert.ok(last);
+        } else {
+          assert.ok(!last);
+        }
+
+        process.nextTick(cb);
+      });
+      assert.equal(6, i);
+      done();
+    });
+
+    it("should separate files using given separator", function(done) {
+      var i = 0;
+      lineReader.eachLineSync(separatorFilePath, {separator: ';'}, function(line, last) {
+        assert.equal(testSeparatorFile[i], line);
+        i += 1;
+      
+        if (i === 3) {
+          assert.ok(last);
+        } else {
+          assert.ok(!last);
+        }
+      });
+      assert.equal(3, i);
+      done();
+    });
+
+    it("should separate files using given separator with more than one character", function(done) {
+      var i = 0;
+      lineReader.eachLineSync(multiSeparatorFilePath, {separator: '||'}, function(line, last) {
+        assert.equal(testSeparatorFile[i], line);
+        i += 1;
+      
+        if (i === 3) {
+          assert.ok(last);
+        } else {
+          assert.ok(!last);
+        }
+      });
+      assert.equal(3, i);
+      done();
+    });
+
+    it("should allow early termination of line reading", function(done) {
+      var i = 0;
+      lineReader.eachLineSync(testFilePath, function(line, last) {
+        assert.equal(testFile[i], line, 'Each line should be what we expect');
+        i += 1;
+
+        if (i === 2) {
+          return false;
+        }
+      });
+      assert.equal(2, i);
+      done();
+    });
+
+    it("should not call callback on empty file", function(done) {
+      lineReader.eachLineSync(emptyFilePath, function(line) {
+        assert.ok(false, "Empty file should not cause any callbacks");
+      });
+      done()
+    });
+
+    it("should work with a file containing only one line", function(done) {
+      lineReader.eachLineSync(oneLineFilePath, function(line, last) {
+        return true;
+      });
+      done();
+    });
   });
 });
